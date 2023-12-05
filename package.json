@@ -1,16 +1,41 @@
 {
   "name": "byted-apaas-utils",
-  "version": "0.0.2",
-  "description": "",
-  "main": "./src/index.js",
+  "version": "0.0.3",
+  "description": "飞书应用引擎工具函数",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
   "files": [
     "./src",
     "./README.md"
   ],
+  "keywords": [
+    "feishu",
+    "bytedance",
+    "apaas"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "rollup:watch": "rollup -w -c",
+    "ts:watch": "tsc -w -p tsconfig.esm.json & tsc -w -p tsconfig.cjs.json",
+    "watch": "npm run rollup:watch & npm run ts:watch",
+    "build": "rimraf esm && rimraf cjs && rimraf dist && tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && rollup -c"
   },
-  "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.23.5",
+    "@babel/preset-env": "^7.23.5",
+    "@babel/preset-typescript": "^7.23.3",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^20.10.3",
+    "chalk": "^5.3.0",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.6.1",
+    "rollup-plugin-dts": "^6.1.0",
+    "typescript": "^5.3.2"
+  }
 }
