@@ -4,10 +4,7 @@
 
 ```js
 
-const { getOptions } = require('byted-apaas-utils');
-const { initOptions } = require('byted-apaas-utils');
-const { getLogger } = require('byted-apaas-utils');
-const { getParams } = require('byted-apaas-utils');
+const { init } = require('byted-apaas-utils');
 
 /**
  * @param {Params}  params     自定义参数
@@ -21,16 +18,18 @@ module.exports = async function (params, context, logger) {
   logger.info(`${new Date()} 函数开始执行`);
 
   // 在这里补充业务代码
-  initOptions({
+  init({
     params,
     context,
     logger,
   });
-  const options = getOptions();
-  logger.info(options);
-  getLogger().info('logger');
-  logger.info(getParams());
+  fn()
+  // return await main({ params, context, logger });
 };
 
+
+function fn(){
+  logger.info(`${new Date()} : fn 函数开始执行`);
+}
 
 ```

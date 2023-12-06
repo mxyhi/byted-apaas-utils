@@ -1,8 +1,4 @@
-import { getContext, initContext } from './context';
-import { getLogger, initLogger } from './logger';
-import { getParams, initParams } from './params';
-
-const initOptions = ({
+const init = ({
   params,
   context,
   logger,
@@ -14,31 +10,17 @@ const initOptions = ({
   // @ts-ignore
   logger: Logger;
 }) => {
-  initParams(params);
-  initContext(context);
-  initLogger(logger);
-  return {
-    params,
-    context,
-    logger,
-  };
+  // @ts-ignore
+  globalThis.params = params;
+  // @ts-ignore
+  globalThis.context = context;
+  // @ts-ignore
+  globalThis.logger = logger;
 };
 
-const getOptions = () => {
-  return {
-    params: getParams(),
-    context: getContext(),
-    logger: getLogger(),
-  };
-};
+init.init = init;
+module.exports = init;
 
-export {
-  initOptions,
-  getOptions,
-  initParams,
-  getParams,
-  initContext,
-  getContext,
-  initLogger,
-  getLogger,
-};
+export { init, init as default };
+
+

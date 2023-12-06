@@ -1,14 +1,15 @@
 {
   "name": "byted-apaas-utils",
-  "version": "0.0.4",
+  "version": "0.0.17",
   "description": "飞书应用引擎工具函数",
   "main": "cjs/index.js",
   "module": "esm/index.js",
-  "types": "esm/index.d.ts",
+  "types": "types/global.d.ts",
   "files": [
     "./dist",
     "./cjs",
     "./esm",
+    "./types",
     "./README.md"
   ],
   "keywords": [
