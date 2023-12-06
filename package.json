@@ -1,6 +1,6 @@
 {
   "name": "byted-apaas-utils",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "飞书应用引擎工具函数",
   "main": "cjs/index.js",
   "module": "esm/index.js",
