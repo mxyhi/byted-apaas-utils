@@ -3,8 +3,20 @@
 ## example
 
 ```js
+// ===================== ./hooks/useLogger.js =====================
+const { createLoggerHook } = require('byted-apaas-utils');
 
-const { init } = require('byted-apaas-utils');
+const useLogger = createLoggerHook();
+
+module.exports = useLogger;
+
+// ===================== index.js =====================
+
+// 通过 NPM dependencies 成功安装 NPM 包后此处可引入使用
+// 如安装 linq 包后就可以引入并使用这个包
+// const linq = require("linq");
+
+const useLogger = require('./hooks/useLogger');
 
 /**
  * @param {Params}  params     自定义参数
@@ -18,18 +30,14 @@ module.exports = async function (params, context, logger) {
   logger.info(`${new Date()} 函数开始执行`);
 
   // 在这里补充业务代码
-  init({
-    params,
-    context,
-    logger,
-  });
-  fn()
-  // return await main({ params, context, logger });
+  // 初始化 要放最上面
+  useLogger(logger);
+
+  fn();
 };
 
-
-function fn(){
-  logger.info(`${new Date()} : fn 函数开始执行`);
-}
-
+const fn = () => {
+  const logger = useLogger();
+  logger.info('hello world');
+};
 ```
