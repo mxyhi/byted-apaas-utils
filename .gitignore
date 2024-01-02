@@ -132,3 +132,4 @@ dist
 esm
 cjs
 .tsup
+pnpm-lock.yaml

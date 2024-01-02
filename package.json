@@ -42,5 +42,8 @@
     "rollup-plugin-dts": "^6.1.0",
     "tsup": "^8.0.1",
     "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "@byted-apaas/server-sdk-node": "^1.1.14"
   }
 }
