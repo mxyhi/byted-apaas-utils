@@ -5,10 +5,15 @@ import terser from '@rollup/plugin-terser';
 import rollupJson from '@rollup/plugin-json';
 import commonjs from '@rollup/plugin-commonjs';
 import chalk from 'chalk';
-import dts from 'rollup-plugin-dts';
+import fs from 'fs';
+import path from 'path';
 
 export default defineConfig(async () => {
-  const pkgName = 'byted-apaas-utils';
+  const packageJson = JSON.parse(
+    fs.readFileSync(path.resolve('./package.json'), 'utf-8')
+  );
+
+  const pkgName = packageJson.name;
 
   /**
    *
@@ -100,21 +105,5 @@ export default defineConfig(async () => {
         include: 'src/**',
       },
     },
-    /* dts 不如直接使用 tsc --emitDeclarationOnly
-    {
-      treeshake: false,
-      input: input,
-      plugins: [dts()],
-      output: {
-        format: 'esm',
-        dir: 'types',
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-        entryFileNames: '[name].d.ts',
-        esModule: true,
-        exports: 'named',
-      },
-    },
-    */
   ];
 });
