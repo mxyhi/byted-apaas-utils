@@ -9,7 +9,7 @@ export default defineConfig(() => {
     dts: true,
     bundle: false,
     minify: true,
-    target: 'es2020',
+    target: 'es2018',
     tsconfig: './tsconfig.build.json',
   });
 

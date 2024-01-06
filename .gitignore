@@ -133,3 +133,5 @@ esm
 cjs
 .tsup
 pnpm-lock.yaml
+bun.lockb
+package-lock.json

@@ -6,6 +6,7 @@ const createEntry =
   <T extends FnService>(mainConstructor: new () => T) =>
   async (params: Params, context: Context, logger: Logger) => {
     const apiName = getFnName(logger.tags);
+
     logger.log(
       `${new Date()} 函数: [${apiName}] 开始执行================================>`
     );
@@ -28,10 +29,7 @@ const createEntry =
       `${new Date()} 函数: [${apiName}] 结束执行<================================`
     );
 
-    /**
-     * @type {typeof ReturnType<instance['run']>}
-     */
-    return result;
+    return result as ReturnType<T['run']>;
   };
 
 const injectInstanceService = <T extends FnService>(
