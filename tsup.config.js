@@ -1,16 +1,18 @@
+import path from 'path';
 import { defineConfig } from 'tsup';
 
 export default defineConfig(() => {
+  const resolve = (...paths) => path.resolve(__dirname, ...paths);
   const baseConfig = defineConfig({
-    entry: ['./src/**/*.ts'],
+    entry: [resolve('./packages/lib/src/**/*.ts')],
     clean: true,
     format: ['cjs'],
-    outDir: 'cjs',
+    outDir: resolve('./packages/lib/cjs'),
     dts: true,
     bundle: false,
     minify: true,
     target: 'es2018',
-    tsconfig: './tsconfig.build.json',
+    tsconfig: resolve('./packages/lib/tsconfig.build.json'),
   });
 
   return [
@@ -20,7 +22,7 @@ export default defineConfig(() => {
     {
       ...baseConfig,
       format: ['esm'],
-      outDir: 'esm',
+      outDir: resolve('./packages/lib/esm'),
       dts: false,
       outExtension() {
         return {
@@ -32,7 +34,7 @@ export default defineConfig(() => {
     {
       ...baseConfig,
       format: ['cjs'],
-      outDir: 'esm',
+      outDir: resolve('./packages/lib/esm'),
       dts: {
         only: true,
       },
@@ -40,11 +42,11 @@ export default defineConfig(() => {
     // umd
     {
       ...baseConfig,
-      entry: ['./src/index.ts'],
+      entry: [resolve('./packages/lib/src/index.ts')],
       bundle: true,
       dts: false,
       format: ['iife'],
-      outDir: 'dist',
+      outDir: resolve('./packages/lib/dist'),
       globalName: 'bytedApaasUtils',
     },
   ];

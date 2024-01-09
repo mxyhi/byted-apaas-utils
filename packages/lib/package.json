@@ -1,0 +1,29 @@
+{
+  "name": "byted-apaas-utils",
+  "version": "0.0.23",
+  "description": "飞书应用引擎相关工具",
+  "main": "./cjs/index.js",
+  "types": "./esm/index.d.ts",
+  "module": "./esm/index.js",
+  "files": [
+    "./dist",
+    "./cjs",
+    "./esm",
+    "./types",
+    "./README.md"
+  ],
+  "keywords": [
+    "feishu",
+    "bytedance",
+    "apaas",
+    "AE"
+  ],
+  "author": "mxyhi",
+  "license": "ISC",
+  "peerDependencies": {
+    "@byted-apaas/baas-sdk-node": "*",
+    "@byted-apaas/faas-sdk-node": "*",
+    "@byted-apaas/server-common-node": "*",
+    "@byted-apaas/server-sdk-node": "*"
+  }
+}

@@ -132,6 +132,5 @@ dist
 esm
 cjs
 .tsup
-pnpm-lock.yaml
-bun.lockb
-package-lock.json
+
+.DS_Store

@@ -1,17 +1,20 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
-    "rootDir": "src",
+    "module": "CommonJS",
     "declaration": true,
     "noEmit": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "strict": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "lib": [
+      "ES2019"
+    ]
   },
   "include": [
-    "src/**/*",
-    "global.d.ts"
+    "./src/**/*",
+    "./global.d.ts"
   ]
 }
