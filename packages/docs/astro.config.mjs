@@ -7,7 +7,7 @@ export default defineConfig({
 	base: 'byted-apaas-utils',
 	integrations: [
 		starlight({
-			title: 'My Docs',
+			title: 'byted-apaas-utils',
 			social: {
 				github: 'https://github.com/withastro/starlight',
 			},

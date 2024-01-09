@@ -1,6 +1,6 @@
 {
   "name": "byted-apaas-utils",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "飞书应用引擎工具函数",
   "main": "./cjs/index.js",
   "types": "./esm/index.d.ts",
@@ -24,7 +24,7 @@
     "docs:build": "pnpm --filter docs build",
     "docs:preview": "pnpm --filter docs preview",
     "docs:astro": "pnpm --filter docs astro",
-    "push": "cp -r ./README.md ./packages/lib && pnpm --filter byted-apaas-utils npm publish"
+    "push": "pnpm run build && cd ./packages/lib && npm publish"
   },
   "author": "",
   "license": "ISC",
