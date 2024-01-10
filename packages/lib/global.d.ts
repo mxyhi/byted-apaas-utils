@@ -1,5 +1,6 @@
 export {};
 type LoggerFn = (...args: any[]) => void;
+import { Application } from '@byted-apaas/server-sdk-node';
 import type { metadataMap } from '@byted-apaas/server-sdk-node/data';
 
 declare global {
@@ -8,6 +9,8 @@ declare global {
       type: 1 | 2 | 3 | 4;
     };
   };
+
+  const application: Application;
 
   type Logger = {
     log: LoggerFn;
@@ -22,7 +25,7 @@ declare global {
 
   type Params = {};
 
-  interface MetaDataMap extends metadataMap, Record<string, Record<"_id",number>> {
+  interface MetaDataMap extends metadataMap {
     store: {
       _id: number;
       log: string;
@@ -34,7 +37,7 @@ declare global {
         value: string;
       }[];
 
-      hello:string
+      hello: string;
     };
   }
 }

@@ -1,7 +1,3 @@
-export * from './type';
-import { db } from '@byted-apaas/server-sdk-node';
-import type { DB } from '@byted-apaas/server-sdk-node/context/db/impl/db';
-import type { IContext } from '@byted-apaas/server-common-node/context/IContext';
 import type {
   _IKAllEndpoint,
   _IKSyncEndpoint,
@@ -9,14 +5,15 @@ import type {
 } from '@byted-apaas/server-sdk-node/context/db/impl/IObject';
 import type { _Cond } from '@byted-apaas/server-sdk-node/types/types';
 import {
-  MetaDataNames,
-  SelectCond,
+  CreateRecordMap,
   FilterCond,
-  SortCond,
+  ObjectApiNames,
   ResultData,
+  SelectCond,
+  SortCond,
   UpdateRecordCond,
   UpdateRecordMap,
-  CreateRecordMap,
+  metadataMap,
 } from './type';
 
 /**
@@ -29,39 +26,30 @@ import {
  * }).find()
  * ```
  */
-const object = <T extends MetaDataNames>(model: T) =>
-  (db as DB<IContext, MetaDataMap>).object(model);
+const object = <T extends ObjectApiNames>(model: T) => {
+  // @ts-ignore
+  return application.data.object<T>(model);
+};
 
-class BaseModelService<T extends MetaDataNames> {
+class BaseModelService<T extends ObjectApiNames> {
   /**
    * 模型对象
    */
   readonly model;
-  readonly oldModel;
 
-  constructor({ model }: { model?: T } = {}) {
-    if (!model) {
-      this.model = {} as ReturnType<typeof object<T>>;
-      this.oldModel = this.model;
-      return;
-    }
+  constructor({ model }: { model: T }) {
     this.model = this.object(model);
-    this.oldModel = this.model;
   }
 
-  protected resetModel() {
-    (this.model as any) = this.oldModel;
-  }
+  // useUserAuth() {
+  //   (this.model as any) = this.model.useUserAuth();
+  //   return this;
+  // }
 
-  useUserAuth() {
-    (this.model as any) = this.model.useUserAuth();
-    return this;
-  }
-
-  useSystemAuth() {
-    (this.model as any) = this.model.useSystemAuth();
-    return this;
-  }
+  // useSystemAuth() {
+  //   (this.model as any) = this.model.useSystemAuth();
+  //   return this;
+  // }
 
   /**
    * 操作指定对象的记录数据
@@ -73,8 +61,8 @@ class BaseModelService<T extends MetaDataNames> {
    * }).find()
    * ```
    */
-  protected object<O extends MetaDataNames>(model: O) {
-    return (db as DB<IContext, MetaDataMap>).object(model);
+  object(model: T) {
+    return object<T>(model);
   }
 
   /**
@@ -89,8 +77,6 @@ class BaseModelService<T extends MetaDataNames> {
     select: U[] = [],
     sort: SortCond<T> = {}
   ) {
-    this.resetModel();
-
     const returnData: ResultData<T, U>[] = [],
       keys = Object.keys(sort as {}),
       descKeys = keys.filter(key => (sort as any)[key] === -1),
@@ -98,11 +84,11 @@ class BaseModelService<T extends MetaDataNames> {
 
     return this.model
       .where(filter)
-      .select(select)
+      .select(select as string[])
       .orderBy(sortKeys as any)
       .orderByDesc(descKeys as any)
       .findStream(async records => {
-        returnData.push(...(records as MetaDataMap[T][]));
+        returnData.push(...(records as ResultData<T, U>[]));
       })
       .then(() => returnData);
   }
@@ -117,11 +103,9 @@ class BaseModelService<T extends MetaDataNames> {
     filter: FilterCond<T> = {},
     select: U[] = []
   ) {
-    this.resetModel();
-
     return this.model
       .where(filter)
-      .select(select)
+      .select(select as string[])
       .findOne()
       .then(result => result as ResultData<T, U>);
   }
@@ -149,8 +133,6 @@ class BaseModelService<T extends MetaDataNames> {
     page?: number;
     sort?: SortCond<T>;
   } = {}) {
-    this.resetModel();
-
     const filterOptions = this.model.where(filter as {});
     const returnData: ResultData<T, U>[] = [];
     const keys = Object.keys(sort as {});
@@ -160,7 +142,7 @@ class BaseModelService<T extends MetaDataNames> {
     return Promise.all([
       filterOptions.count(),
       filterOptions
-        .select(select)
+        .select(select as any)
         .orderBy(sortKeys as any)
         .orderByDesc(descKeys as any)
         .offset((page - 1) * pageSize)
@@ -188,8 +170,6 @@ class BaseModelService<T extends MetaDataNames> {
    * @returns 返回符合条件的记录数
    */
   async count(filter: FilterCond<T> = {}) {
-    this.resetModel();
-
     return this.model.where(filter).count();
   }
 
@@ -228,8 +208,6 @@ class BaseModelService<T extends MetaDataNames> {
     idOrRecord: number | UpdateRecordCond<T>,
     recordMap?: UpdateRecordMap<T>
   ) {
-    this.resetModel();
-
     if (typeof idOrRecord !== 'number') {
       if (!(idOrRecord as any)._id) throw Error('_id is required');
 
@@ -238,7 +216,7 @@ class BaseModelService<T extends MetaDataNames> {
 
     if (!recordMap) throw Error('recordMap is required');
 
-    return this.model.update(idOrRecord, recordMap as _Cond<MetaDataMap[T]>);
+    return this.model.update(idOrRecord, recordMap as _Cond<metadataMap[T]>);
   }
 
   /**
@@ -248,8 +226,6 @@ class BaseModelService<T extends MetaDataNames> {
    * @returns 0：未找到符合条件的记录
    */
   async updateOne(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
-    this.resetModel();
-
     if (!filter || !Reflect.ownKeys(filter).length)
       throw Error('filter is required and can not be empty');
 
@@ -270,8 +246,6 @@ class BaseModelService<T extends MetaDataNames> {
    * @paramExample [{_id: 1001, _name: 'John', gender: 'male'}, {_id: 1002, _name: 'Alis', gender: 'female'}]
    */
   async batchUpdate(recordMapList: UpdateRecordCond<T>[]) {
-    this.resetModel();
-
     if (!recordMapList.every(item => item._id)) throw Error('_id is required');
 
     let updateList = [];
@@ -293,8 +267,6 @@ class BaseModelService<T extends MetaDataNames> {
    * @param updateData 用于更新的新数据
    */
   async updateMany(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
-    this.resetModel();
-
     const recordList = await this.find(filter, ['_id']);
 
     return this.batchUpdate(
@@ -311,8 +283,6 @@ class BaseModelService<T extends MetaDataNames> {
    * @paramExample [{_name: 'John', age: 19, gender: 'male'}, {_name: 'Alis', age: 16, gender: 'female'}]
    */
   async batchCreate(recordMapList: CreateRecordMap<T>[]) {
-    this.resetModel();
-
     if (!recordMapList.every(item => item._id)) throw Error('_id is required');
 
     let updateList = [];
@@ -327,19 +297,32 @@ class BaseModelService<T extends MetaDataNames> {
   }
 }
 
-class A extends BaseModelService<'store'> {
-  constructor(){
-    super({ model: 'store'})
+/**
+ * node constructor function
+ * @param model object api name
+ * @example
+ * ```js
+ * class UserService extends createModelServiceClass("_user") {}
+ * ```
+ */
+const createModelServiceClass = <T extends ObjectApiNames>(model: T) =>
+  class extends BaseModelService<T> {
+    constructor() {
+      super({ model });
+    }
+  };
 
-    this.model.where({
-      'warn':{}
-    })
+/**
+ * 获取对象模型实例
+ * @param model object api name
+ * @returns model
+ */
+const createModelService = <T extends ObjectApiNames>(model: T) =>
+  new BaseModelService<T>({ model });
 
-    // this.findOne({'warn':},[]).then(res=>{
-
-    //   res
-    // })
-  }
-}
-
-export { BaseModelService, object };
+export {
+  BaseModelService,
+  object,
+  createModelServiceClass,
+  createModelService,
+};
