@@ -1,6 +1,7 @@
 export {};
 type LoggerFn = (...args: any[]) => void;
 import { Application } from '@byted-apaas/server-sdk-node';
+import { IDB } from '@byted-apaas/server-sdk-node/context/db/db';
 import type { metadataMap } from '@byted-apaas/server-sdk-node/data';
 
 declare global {
@@ -10,7 +11,9 @@ declare global {
     };
   };
 
-  const application: Application;
+  const application: Application & {
+    data: IDB<{}, metadataMap>;
+  };
 
   type Logger = {
     log: LoggerFn;

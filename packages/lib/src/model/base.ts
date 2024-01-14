@@ -70,27 +70,55 @@ class BaseModelService<T extends ObjectApiNames> {
    * @param filter 筛选条件
    * @param select 需返回的字段
    * @param sort 排序字段
+   * @param desc 是否降序 默认`false`：升序;`true`：降序
    * @returns 返回所有符合条件的记录
    */
   async find<U extends SelectCond<T>>(
     filter: FilterCond<T> = {},
     select: U[] = [],
-    sort: SortCond<T> = {}
+    sort: U[] = [],
+    desc: boolean = false
   ) {
-    const returnData: ResultData<T, U>[] = [],
-      keys = Object.keys(sort as {}),
-      descKeys = keys.filter(key => (sort as any)[key] === -1),
-      sortKeys = keys.filter(key => (sort as any)[key] === 1);
+    const returnData: ResultData<T, U>[] = [];
 
-    return this.model
-      .where(filter)
-      .select(select as string[])
-      .orderBy(sortKeys as any)
-      .orderByDesc(descKeys as any)
-      .findStream(async records => {
+    return this.findStream({
+      filter,
+      select,
+      sort,
+      desc,
+      handler(records) {
         returnData.push(...(records as ResultData<T, U>[]));
-      })
-      .then(() => returnData);
+      },
+    }).then(() => returnData);
+  }
+
+  /**
+   * 流式查找所有符合条件的记录
+   * @param param0
+   * @param param0.filter 筛选条件
+   * @param param0.select 需返回的字段
+   * @param param0.sort 排序字段
+   * @param param0.desc 是否降序 默认`false`：升序;`true`：降序
+   * @param param0.handler 处理每次查询到的记录
+   * @returns
+   */
+  findStream<U extends SelectCond<T>>({
+    filter = {},
+    select = [],
+    sort = [],
+    desc = false,
+    handler,
+  }: {
+    filter?: FilterCond<T>;
+    select?: U[];
+    sort?: U[];
+    desc?: boolean;
+    handler: (records: ResultData<T, U>[]) => Promise<void> | void;
+  }) {
+    const options = this.model.where(filter).select(select),
+      sortOptions = desc ? options.orderByDesc(sort) : options.orderBy(sort);
+
+    return sortOptions.findStream(handler as any);
   }
 
   /**
@@ -105,7 +133,7 @@ class BaseModelService<T extends ObjectApiNames> {
   ) {
     return this.model
       .where(filter)
-      .select(select as string[])
+      .select(select)
       .findOne()
       .then(result => result as ResultData<T, U>);
   }
@@ -118,6 +146,7 @@ class BaseModelService<T extends ObjectApiNames> {
    * @param param.pageSize 每页条数
    * @param param.page 页码
    * @param param.sort 排序字段
+   * @param param.desc 是否降序 默认`false`：升序;`true`：降序
    * @returns 返回符合条件的总数和当前页的记录
    */
   async findLimit<U extends SelectCond<T>>({
@@ -125,26 +154,26 @@ class BaseModelService<T extends ObjectApiNames> {
     select = [],
     pageSize = 200,
     page = 1,
-    sort = {},
+    sort = [],
+    desc = false,
   }: {
     filter?: FilterCond<T>;
     select?: U[];
     pageSize?: number;
     page?: number;
-    sort?: SortCond<T>;
+    sort?: U[];
+    desc?: boolean;
   } = {}) {
-    const filterOptions = this.model.where(filter as {});
-    const returnData: ResultData<T, U>[] = [];
-    const keys = Object.keys(sort as {});
-    const descKeys = keys.filter(key => (sort as any)[key] === -1);
-    const sortKeys = keys.filter(key => (sort as any)[key] === 1);
+    const returnData: ResultData<T, U>[] = [],
+      filterOptions = this.model.where(filter as {}),
+      sortOptions = desc
+        ? filterOptions.orderByDesc(...sort)
+        : filterOptions.orderBy(...sort);
 
     return Promise.all([
       filterOptions.count(),
-      filterOptions
-        .select(select as any)
-        .orderBy(sortKeys as any)
-        .orderByDesc(descKeys as any)
+      sortOptions
+        .select(select)
         .offset((page - 1) * pageSize)
         .limit(pageSize)
         .findStream(async records => {
@@ -233,6 +262,7 @@ class BaseModelService<T extends ObjectApiNames> {
 
     if (!targetRecord) return 0;
 
+    // @ts-ignore
     const { _id } = targetRecord;
 
     if (!_id) throw Error('_id is required');
@@ -267,11 +297,13 @@ class BaseModelService<T extends ObjectApiNames> {
    * @param updateData 用于更新的新数据
    */
   async updateMany(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
+    // @ts-ignore
     const recordList = await this.find(filter, ['_id']);
 
     return this.batchUpdate(
       recordList.map(item => ({
         ...updateData,
+        // @ts-ignore
         _id: item._id,
       }))
     );
@@ -305,6 +337,7 @@ class BaseModelService<T extends ObjectApiNames> {
  * class UserService extends createModelServiceClass("_user") {}
  * ```
  */
+// @ts-ignore
 const createModelServiceClass = <T extends ObjectApiNames>(model: T) =>
   class extends BaseModelService<T> {
     constructor() {
@@ -317,8 +350,9 @@ const createModelServiceClass = <T extends ObjectApiNames>(model: T) =>
  * @param model object api name
  * @returns model
  */
-const createModelService = <T extends ObjectApiNames>(model: T) =>
-  new BaseModelService<T>({ model });
+const createModelService = <T extends ObjectApiNames>(
+  model: T
+): BaseModelService<T> => new BaseModelService<T>({ model });
 
 export {
   BaseModelService,
