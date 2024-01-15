@@ -15,6 +15,7 @@ import {
   UpdateRecordMap,
   metadataMap,
 } from './type';
+import { BatchResult } from '@byted-apaas/server-sdk-node/common/structs';
 
 /**
  * 操作指定对象的记录数据
@@ -37,19 +38,33 @@ class BaseModelService<T extends ObjectApiNames> {
    */
   readonly model;
 
+  /**
+   * 模型名称
+   */
+  readonly modelName;
+
   constructor({ model }: { model: T }) {
+    this.modelName = model;
     this.model = this.object(model);
   }
 
-  // useUserAuth() {
-  //   (this.model as any) = this.model.useUserAuth();
-  //   return this;
-  // }
+  /**
+   * 用户级鉴权
+   */
+  useUserAuth() {
+    const service = new BaseModelService<T>({ model: this.modelName });
+    (service.model as unknown) = service.model.useUserAuth();
+    return service;
+  }
 
-  // useSystemAuth() {
-  //   (this.model as any) = this.model.useSystemAuth();
-  //   return this;
-  // }
+  /**
+   * 系统级鉴权
+   */
+  useSystemAuth() {
+    const service = new BaseModelService<T>({ model: this.modelName });
+    (service.model as unknown) = service.model.useSystemAuth();
+    return service;
+  }
 
   /**
    * 操作指定对象的记录数据
@@ -271,6 +286,24 @@ class BaseModelService<T extends ObjectApiNames> {
   }
 
   /**
+   * 根据筛选条件更新多条记录
+   * @param filter 筛选条件
+   * @param updateData 用于更新的新数据
+   */
+  async updateMany(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
+    // @ts-ignore
+    const recordList = await this.find(filter, ['_id']);
+
+    return this.batchUpdate(
+      recordList.map(item => ({
+        ...updateData,
+        // @ts-ignore
+        _id: item._id,
+      }))
+    );
+  }
+
+  /**
    * 根据 _id 批量更新记录
    * @param recordMapList 多条用于更新的记录数据组成的数组，记录数据需对 _id 赋值
    * @paramExample [{_id: 1001, _name: 'John', gender: 'male'}, {_id: 1002, _name: 'Alis', gender: 'female'}]
@@ -292,27 +325,24 @@ class BaseModelService<T extends ObjectApiNames> {
   }
 
   /**
-   * 根据 _id 批量更新记录
-   * @param filter 筛选条件
-   * @param updateData 用于更新的新数据
+   * 创建记录
+   * @param recordMap 用于创建的一条记录
+   * @paramExample {_name: 'John', age: 19, gender: 'male'}
+   * @example
+   * create({
+   *     _name: new application.constants.type.Multilingual({ zh: '部门' }),
+   *     _manager: { _id: 1660000000 },
+   *     _status: '_active'
+   * })
    */
-  async updateMany(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
-    // @ts-ignore
-    const recordList = await this.find(filter, ['_id']);
-
-    return this.batchUpdate(
-      recordList.map(item => ({
-        ...updateData,
-        // @ts-ignore
-        _id: item._id,
-      }))
-    );
+  create(recordMap: _Cond<metadataMap[T]>) {
+    return this.model.create(recordMap);
   }
 
   /**
    * 批量创建记录
    * @param recordMapList 多条用于创建的记录数据组成的数组
-   * @paramExample [{_name: 'John', age: 19, gender: 'male'}, {_name: 'Alis', age: 16, gender: 'female'}]
+   * @paramExample `[{_name: 'John', age: 19, gender: 'male'}, {_name: 'Alis', age: 16, gender: 'female'}]`
    */
   async batchCreate(recordMapList: CreateRecordMap<T>[]) {
     if (!recordMapList.every(item => item._id)) throw Error('_id is required');
@@ -326,6 +356,69 @@ class BaseModelService<T extends ObjectApiNames> {
       i += 500;
     }
     return result;
+  }
+
+  /**
+   * 删除记录
+   * @param recordID 用于删除的一条记录的 ID
+   * @example
+   * deleteOneById(123456789123)
+   */
+  deleteOneById(recordID: number): Promise<void>;
+  /**
+   * 删除记录
+   * @param record 用于删除的一条完整记录
+   * @example
+   * deleteOneById(context.targetRecord.original)
+   */
+  deleteOneById(record: _Cond<T>): Promise<void>;
+
+  deleteOneById(recordOrId: number | _Cond<T>) {
+    return this.model.delete(recordOrId);
+  }
+
+  /**
+   * 删除符合条件的一条记录
+   * @param filter 筛选条件
+   * @returns 0：未找到符合条件的记录
+   */
+  async deleteOne(filter: FilterCond<T>) {
+    const target = await this.findOne(filter, ['_id'] as any);
+    if (!target) return 0;
+
+    return this.deleteOneById((target as any)._id);
+  }
+
+  /**
+   * 根据 _id 批量更新记录
+   * @param recordMapList 多条用于更新的记录数据组成的数组，记录数据需对 _id 赋值
+   * @paramExample [{_id: 1001, _name: 'John', gender: 'male'}, {_id: 1002, _name: 'Alis', gender: 'female'}]
+   */
+  async batchDelete(recordMapList: UpdateRecordCond<T>[] | number[]) {
+    if (!recordMapList.every(item => typeof item === 'object' && item._id))
+      throw Error('_id is required');
+
+    let updateList = [];
+    const result = [];
+
+    for (let i = 0; i < recordMapList.length; ) {
+      updateList = recordMapList.slice(i, i + 500);
+      const res = await this.model.batchDelete(updateList);
+      result.push(res);
+      i += 500;
+    }
+
+    return result;
+  }
+
+  /**
+   * 删除符合条件的所有记录
+   * @param filter 筛选条件
+   */
+  async deleteMany(filter: FilterCond<T>) {
+    const targetList = await this.find(filter, ['_id'] as any);
+
+    return this.batchDelete(targetList.map(item => (item as any)._id));
   }
 }
 

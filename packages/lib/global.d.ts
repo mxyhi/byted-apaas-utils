@@ -11,11 +11,9 @@ declare global {
     };
   };
 
-
   const application: Application & {
     data: IDB<{}, metadataMap>;
   };
-
 
   type Logger = {
     log: LoggerFn;
