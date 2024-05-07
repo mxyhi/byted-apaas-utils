@@ -273,7 +273,7 @@ class BaseModelService<T extends ObjectApiNames> {
     if (!filter || !Reflect.ownKeys(filter).length)
       throw Error('filter is required and can not be empty');
 
-    const targetRecord = await this.findOne(filter);
+    const targetRecord = await this.findOne(filter, ['_id'] as any);
 
     if (!targetRecord) return 0;
 

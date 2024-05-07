@@ -1,0 +1,56 @@
+---
+title: 类入口
+description: 飞书应用引擎apaas数据类入口
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## 使用
+
+> 类
+
+<Tabs>
+
+<TabItem label="javascript">
+
+```js
+const { createModelServiceClass } = require("byted-apaas-utils");
+
+class SystemUserService extends createModelServiceClass("_user") {}
+
+const systemUserService = new SystemUserService();
+
+systemUserService.find(...);
+```
+
+</TabItem>
+
+<TabItem label="typescript">
+
+```ts
+import { BaseModelService } from "byted-apaas-utils";
+
+class SystemUserService extends BaseModelService<"_user"> {
+  constructor() {
+    super({ model: "_user" });
+  }
+}
+
+const systemUserService = new SystemUserService();
+
+systemUserService.find(...);
+```
+
+</TabItem>
+
+</Tabs>
+
+> 函数
+
+```js
+const { createModelService } = require("byted-apaas-utils");
+
+const systemUserService = createModelService("_user");
+
+systemUserService.find(...);
+```
