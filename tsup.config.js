@@ -10,7 +10,7 @@ export default defineConfig(() => {
     outDir: resolve('./packages/lib/cjs'),
     dts: true,
     bundle: false,
-    minify: true,
+    minify: false,
     target: 'es2018',
     tsconfig: resolve('./packages/lib/tsconfig.build.json'),
   });

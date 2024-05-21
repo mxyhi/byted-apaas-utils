@@ -345,8 +345,6 @@ class BaseModelService<T extends ObjectApiNames> {
    * @paramExample `[{_name: 'John', age: 19, gender: 'male'}, {_name: 'Alis', age: 16, gender: 'female'}]`
    */
   async batchCreate(recordMapList: CreateRecordMap<T>[]) {
-    if (!recordMapList.every(item => item._id)) throw Error('_id is required');
-
     let updateList = [];
     const result = [];
     for (let i = 0; i < recordMapList.length; ) {
