@@ -17,11 +17,16 @@ const emitter = (type: Event['type'], args: any[]) => (event: Plugin) => {
 };
 
 export class ALogger {
-  private static container = new Map();
+  private static container = new Map<string, Logger>();
   private static events: Plugin[] = [];
 
   static addEffect(...effects: Plugin[]) {
     return this.events.push(...effects) - 1;
+  }
+
+  static gc() {
+    const key = getInvokeFuncName() + '_' + getLogID();
+    return this.container.delete(key);
   }
 
   static removeEffect(id: number) {
@@ -29,7 +34,7 @@ export class ALogger {
   }
 
   private static get logger(): Logger {
-    return this.container.get(getInvokeFuncName() + '_' + getLogID());
+    return this.container.get(getInvokeFuncName() + '_' + getLogID())!;
   }
 
   static inject(logger: Logger) {

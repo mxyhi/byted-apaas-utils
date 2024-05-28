@@ -24,6 +24,14 @@ declare global {
       key: string;
       value: string;
     }[];
+    requestID: string;
+    startTriggerTime: number;
+    startRuntime: number;
+    errorNum: number;
+    infoNum: number;
+    warnNum: number;
+    isDebug: boolean;
+    sequence: number;
   };
 
   type Params = {};
