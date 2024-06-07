@@ -33,7 +33,7 @@ export class ALogger {
     return this.events.splice(id, 1);
   }
 
-  private static get logger(): Logger {
+  static get logger(): Logger {
     return this.container.get(getInvokeFuncName() + '_' + getLogID())!;
   }
 
@@ -42,30 +42,30 @@ export class ALogger {
   }
 
   static log(...args: any[]) {
-    this.logger.log(...args);
     queueMicrotask(() => {
       this.events.forEach(emitter('log', args));
     });
+    return this.logger.log(...args);
   }
 
   static info(...args: any[]) {
-    this.logger.info(...args);
     queueMicrotask(() => {
       this.events.forEach(emitter('info', args));
     });
+    return this.logger.info(...args);
   }
 
   static warn(...args: any[]) {
-    this.logger.warn(...args);
     queueMicrotask(() => {
       this.events.forEach(emitter('warn', args));
     });
+    return this.logger.warn(...args);
   }
 
   static error(...args: any[]) {
-    this.logger.error(...args);
     queueMicrotask(() => {
       this.events.forEach(emitter('error', args));
     });
+    return this.logger.error(...args);
   }
 }
