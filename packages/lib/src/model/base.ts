@@ -2,8 +2,8 @@ import type {
   _IKAllEndpoint,
   _IKSyncEndpoint,
   _IKQuery,
-} from '@byted-apaas/server-sdk-node/context/db/impl/IObject';
-import type { _Cond } from '@byted-apaas/server-sdk-node/types/types';
+} from "@byted-apaas/server-sdk-node/context/db/impl/IObject";
+import type { _Cond } from "@byted-apaas/server-sdk-node/types/types";
 import {
   CreateRecordMap,
   FilterCond,
@@ -14,8 +14,8 @@ import {
   UpdateRecordCond,
   UpdateRecordMap,
   metadataMap,
-} from './type';
-import { BatchResult } from '@byted-apaas/server-sdk-node/common/structs';
+} from "./type";
+import { BatchResult } from "@byted-apaas/server-sdk-node/common/structs";
 
 /**
  * 操作指定对象的记录数据
@@ -150,7 +150,7 @@ class BaseModelService<T extends ObjectApiNames> {
       .where(filter)
       .select(select)
       .findOne()
-      .then(result => result as ResultData<T, U>);
+      .then((result) => result as ResultData<T, U>);
   }
 
   /**
@@ -191,7 +191,7 @@ class BaseModelService<T extends ObjectApiNames> {
         .select(select)
         .offset((page - 1) * pageSize)
         .limit(pageSize)
-        .findStream(async records => {
+        .findStream(async (records) => {
           returnData.push(...(records as ResultData<T, U>[]));
         }),
     ]).then(([total]) => {
@@ -252,13 +252,13 @@ class BaseModelService<T extends ObjectApiNames> {
     idOrRecord: number | UpdateRecordCond<T>,
     recordMap?: UpdateRecordMap<T>
   ) {
-    if (typeof idOrRecord !== 'number') {
-      if (!(idOrRecord as any)._id) throw Error('_id is required');
+    if (typeof idOrRecord !== "number") {
+      if (!(idOrRecord as any)._id) throw Error("_id is required");
 
       return this.model.update(idOrRecord);
     }
 
-    if (!recordMap) throw Error('recordMap is required');
+    if (!recordMap) throw Error("recordMap is required");
 
     return this.model.update(idOrRecord, recordMap as _Cond<metadataMap[T]>);
   }
@@ -271,16 +271,16 @@ class BaseModelService<T extends ObjectApiNames> {
    */
   async updateOne(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
     if (!filter || !Reflect.ownKeys(filter).length)
-      throw Error('filter is required and can not be empty');
+      throw Error("filter is required and can not be empty");
 
-    const targetRecord = await this.findOne(filter, ['_id'] as any);
+    const targetRecord = await this.findOne(filter, ["_id"] as any);
 
     if (!targetRecord) return 0;
 
     // @ts-ignore
     const { _id } = targetRecord;
 
-    if (!_id) throw Error('_id is required');
+    if (!_id) throw Error("_id is required");
 
     return this.model.update(_id, updateData);
   }
@@ -292,10 +292,10 @@ class BaseModelService<T extends ObjectApiNames> {
    */
   async updateMany(filter: FilterCond<T>, updateData: UpdateRecordMap<T>) {
     // @ts-ignore
-    const recordList = await this.find(filter, ['_id']);
+    const recordList = await this.find(filter, ["_id"]);
 
     return this.batchUpdate(
-      recordList.map(item => ({
+      recordList.map((item) => ({
         ...updateData,
         // @ts-ignore
         _id: item._id,
@@ -309,7 +309,8 @@ class BaseModelService<T extends ObjectApiNames> {
    * @paramExample [{_id: 1001, _name: 'John', gender: 'male'}, {_id: 1002, _name: 'Alis', gender: 'female'}]
    */
   async batchUpdate(recordMapList: UpdateRecordCond<T>[]) {
-    if (!recordMapList.every(item => item._id)) throw Error('_id is required');
+    if (!recordMapList.every((item) => item._id))
+      throw Error("_id is required");
 
     let updateList = [];
     const result = [];
@@ -381,7 +382,7 @@ class BaseModelService<T extends ObjectApiNames> {
    * @returns 0：未找到符合条件的记录
    */
   async deleteOne(filter: FilterCond<T>) {
-    const target = await this.findOne(filter, ['_id'] as any);
+    const target = await this.findOne(filter, ["_id"] as any);
     if (!target) return 0;
 
     return this.deleteOneById((target as any)._id);
@@ -393,8 +394,9 @@ class BaseModelService<T extends ObjectApiNames> {
    * @paramExample [{_id: 1001, _name: 'John', gender: 'male'}, {_id: 1002, _name: 'Alis', gender: 'female'}]
    */
   async batchDelete(recordMapList: UpdateRecordCond<T>[] | number[]) {
-    if (!recordMapList.every(item => typeof item === 'object' && item._id))
-      throw Error('_id is required');
+    if (recordMapList?.length === 0) return [];
+    if (!recordMapList.every((item) => typeof item === "object" && item._id))
+      throw Error("_id is required");
 
     let updateList = [];
     const result = [];
@@ -414,9 +416,9 @@ class BaseModelService<T extends ObjectApiNames> {
    * @param filter 筛选条件
    */
   async deleteMany(filter: FilterCond<T>) {
-    const targetList = await this.find(filter, ['_id'] as any);
+    const targetList = await this.find(filter, ["_id"] as any);
 
-    return this.batchDelete(targetList.map(item => (item as any)._id));
+    return this.batchDelete(targetList.map((item) => (item as any)._id));
   }
 }
 
