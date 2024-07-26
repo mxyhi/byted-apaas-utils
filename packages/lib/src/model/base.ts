@@ -395,11 +395,12 @@ class BaseModelService<T extends ObjectApiNames> {
    */
   async batchDelete(recordMapList: UpdateRecordCond<T>[] | number[]) {
     if (recordMapList?.length === 0) return [];
-    if (
-      !recordMapList.every((item) => typeof item === "object" && item._id) ||
-      !recordMapList.every((item) => typeof item === "number")
-    )
+    if (!recordMapList.every((item) => typeof item === "object" && item._id))
       throw Error("_id is required");
+
+    if (!recordMapList.every((item) => typeof item === "number")) {
+      throw Error("item is not number");
+    }
 
     let updateList = [];
     const result = [];
