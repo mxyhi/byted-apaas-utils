@@ -395,12 +395,12 @@ class BaseModelService<T extends ObjectApiNames> {
    */
   async batchDelete(recordMapList: UpdateRecordCond<T>[] | number[]) {
     if (recordMapList?.length === 0) return [];
-    if (
-      !recordMapList.every((item) => typeof item === "object" && item._id) &&
-      !recordMapList.every((item) => typeof item === "number")
-    ) {
-      throw Error("_id is required");
-    }
+    // if (
+    //   !recordMapList.every((item) => typeof item === "object" && item._id) &&
+    //   !recordMapList.every((item) => typeof item === "number")
+    // ) {
+    //   throw Error("_id is required");
+    // }
 
     let updateList = [];
     const result = [];
@@ -422,7 +422,7 @@ class BaseModelService<T extends ObjectApiNames> {
   async deleteMany(filter: FilterCond<T>) {
     const targetList = await this.find(filter, ["_id"] as any);
 
-    return this.batchDelete(targetList.map((item) => item as any));
+    return this.batchDelete(targetList.map((item) => (item as any)._id));
   }
 }
 
