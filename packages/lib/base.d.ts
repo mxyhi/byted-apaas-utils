@@ -1,8 +1,8 @@
 import {
   _IKAllEndpoint,
   _IKQuery,
-} from '@byted-apaas/server-sdk-node/context/db/impl/IObject';
-import { _Cond } from '@byted-apaas/server-sdk-node/types/types';
+} from "@byted-apaas/server-sdk-node/context/db/impl/IObject";
+import { _Cond } from "@byted-apaas/server-sdk-node/types/types";
 import {
   ObjectApiNames,
   SelectCond,
@@ -12,9 +12,9 @@ import {
   UpdateRecordMap,
   metadataMap,
   CreateRecordMap,
-} from './type.js';
-import { BatchResult } from '@byted-apaas/server-sdk-node/common/structs';
-import '@byted-apaas/server-sdk-node/context/db/db';
+} from "./type.js";
+import { BatchResult } from "@byted-apaas/server-sdk-node/common/structs";
+import "@byted-apaas/server-sdk-node/context/db/db";
 
 /**
  * 操作指定对象的记录数据
